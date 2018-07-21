@@ -1,28 +1,40 @@
+var map = require('map-async')
+var flatten = require('flatten')
 var request = require('request')
 var cheerio = require('cheerio')
 
-module.exports = function (opts, cb) {
-  var {symbol} = opts
-  var url = getUrl({symbol})
+module.exports = function fetchOptions (opts, cb) {
+  var {symbol, date} = opts
+
+  var url = getUrl({symbol, date})
   request(url, function (err, res, body) {
     if (err) return cb(err)
 
     var $ = cheerio.load(body)
 
-    var dates = getDates($)
-    var date = dates.shift()
+    var dates = []
 
-    var calls = getOptions({type: 'call', date}, $)
-    var puts = getOptions({type: 'put', date}, $)
+    if (!date) {
+      dates = getDates($)
+      date = dates.shift()
+    }
 
-    console.log('puts', puts)
+    var calls = parseOptions({type: 'call', date}, $)
+    var puts = parseOptions({type: 'put', date}, $)
 
+    var dateOpts = dates.map(function (d) {
+      return {symbol, date: d}
+    })
 
-    // console.log(body.length)
+    map(dateOpts, fetchOptions, function (err, grouped) {
+      if (err) return cb(err)
+
+      cb(null, flatten([calls, puts, grouped]))
+    })
   })
 }
 
-function getOptions (opts, $) {
+function parseOptions (opts, $) {
   var type = opts.type
   var expiresAt = opts.date
   var expirationDate = new Date(1000 * expiresAt).toISOString().slice(0, 10)
@@ -61,6 +73,8 @@ function getDates ($) {
 }
 
 function getUrl (opts) {
-  var {symbol} = opts
-  return `https://finance.yahoo.com/quote/${symbol}/options?p=${symbol}&straddle=false`
+  var {symbol, date} = opts
+  var url = `https://finance.yahoo.com/quote/${symbol}/options?p=${symbol}&straddle=false`
+  if (date) url += `&${date}`
+  return url
 }

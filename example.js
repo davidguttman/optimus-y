@@ -1,5 +1,5 @@
-var replay = require('replay')
-  // .mode = 'record'
+require('replay')
+// .mode = 'record'
 
 var optimus = require('./')
 

@@ -11,9 +11,12 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "flatten": "^1.0.2",
+    "map-async": "^0.1.1",
     "request": "^2.87.0"
   },
   "devDependencies": {
-    "replay": "^2.3.0"
+    "replay": "^2.3.0",
+    "standard": "^11.0.1"
   }
 }
