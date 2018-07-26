@@ -75,6 +75,6 @@ function getDates ($) {
 function getUrl (opts) {
   var {symbol, date} = opts
   var url = `https://finance.yahoo.com/quote/${symbol}/options?p=${symbol}&straddle=false`
-  if (date) url += `&${date}`
+  if (date) url += `&date=${date}`
   return url
 }
